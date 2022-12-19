@@ -100,7 +100,19 @@
 
 동작 후 버튼을 누르기 전까지
 
+
+https://user-images.githubusercontent.com/104303815/208547538-8d2ed67a-f44e-4ed3-9c2c-1ab7738f7d89.mp4
+
+
 OFF 상태인 경우
 
+
+https://user-images.githubusercontent.com/104303815/208547553-478bd961-ec82-4c38-8f7d-7763a13689ae.mp4
+
+
 ON 상태로 전환 후
+
+
+https://user-images.githubusercontent.com/104303815/208547726-14f0359c-3e6f-48d2-898b-4fb498cc1610.mp4
+
 
