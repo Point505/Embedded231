@@ -46,9 +46,9 @@
 
      조건문을 통하여 변수 distance로 값을 확인한다. distance 변수는 초음파 센서가 측정한 값이다.
   
-       
-        if((int)distance >=10 && Check != 1)
-        {
+
+   		    if((int)distance >=10 && Check != 1)
+		    {
 				    ClockOPEN();//Clock 함수 호출 후 시간 확
 				    Check = 1;
 		    }
