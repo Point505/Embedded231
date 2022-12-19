@@ -44,9 +44,53 @@
 # 3. 동작
 
 
-     거리를 측정하는 초음파 센서가 
+     조건문을 통하여 변수 distance로 값을 확인한다. distance 변수는 초음파 센서가 측정한 값이다.
   
+       
+        if((int)distance >=10 && Check != 1)
+        {
+				    ClockOPEN();//Clock 함수 호출 후 시간 확
+				    Check = 1;
+		    }
 
+		
+		
+		    else if((int)distance < 4 && Check != 0)
+		    {
+				    ClockCLOSE();
+				    Check = 0;
+		    }
+        
+        
+        //-------------------------------------------------------------- 시간 최초 초기
+        
+        I2C를 사용하였으며 최초로 값을 초기화 시켜주는 함수이다.
+        
+        if(atoi(argv[1])==0){
+        
+        
+              wiringPiI2CWriteReg8(i2c_fd,0x06,0x22);
+              wiringPiI2CWriteReg8(i2c_fd,0x05,0x12);
+              wiringPiI2CWriteReg8(i2c_fd,0x04,0x08);
+              wiringPiI2CWriteReg8(i2c_fd,0x03,0x04);
+
+
+              wiringPiI2CWriteReg8(i2c_fd, 0x02,0x17);// hour
+              wiringPiI2CWriteReg8(i2c_fd, 0x01,0x05);// min  
+              wiringPiI2CWriteReg8(i2c_fd, 0x00,0x00); 
+        }
+		
+        //-------------------------------------------------------------------- 버튼 인식
+         
+        GPIO를 통하여 버튼을 인식한다.
+        
+        Int PinNum()
+        {
+            delay(90);
+            i = digitalRead(GPIO_INPUT);
+
+             return i;
+      	}
 
 
 # 모듈과 라즈베리 파이간 연결
