@@ -91,28 +91,73 @@
 
              return i;
       	}
+	
+	//------------------------------------------------------------------- 멀티 프로세스 및 IPC
+
+		void Distance()// 센서 동작 함수
+	{
+
+		......
+		pid_t pid;
+
+		pipe(FIFO);
+		pid = fork();
+
+		.....
+
+	    while ( 1 )
+	    {
+		.....
+
+	      if(pid == 0) // 자식 프로세스
+	      {
 
 
+			  delay(50);
+			  fwc[0]=PinNum(); // 버튼 함수 PinNum을  호출하여 fwc[0]에 0 | 1을 저장
+			  write(FIFO[1],fwc,sizeof(char));// IPC FIFO을 단방향 통신을 사용하여 PinNum의 return 값을 부모 프로세스로 전달
+			}
+
+		else
+	    {  
+
+			//FIFO 통신 // 저장된 값을 F에 저장 // 여기서 값이 계속 넘어 오니까 그런 
+
+
+	      read(FIFO[0],frc,sizeof(char)); // FIFO를 통항 자식 프로세스로 부터 받은 값
+
+	      .........
+
+		
+	    }
+	  delay(50); 
+		}
+	}
+	
+	
+	
 # 모듈과 라즈베리 파이간 연결
 ![image](https://user-images.githubusercontent.com/104303815/208537651-6b177d9c-c81b-4372-8a94-970f4eaf507b.png)
 
 # 기능 시연 영상
 
-# 동작 후 버튼을 누르기 전까지
 
 
-	https://user-images.githubusercontent.com/104303815/208547538-8d2ed67a-f44e-4ed3-9c2c-1ab7738f7d89.mp4
+동작 후 OFF 상태로 전환
 
 
-# OFF 상태인 경우
+https://user-images.githubusercontent.com/104303815/208547538-8d2ed67a-f44e-4ed3-9c2c-1ab7738f7d89.mp4
 
 
-	https://user-images.githubusercontent.com/104303815/208547553-478bd961-ec82-4c38-8f7d-7763a13689ae.mp4
+OFF 상태인 경우
 
 
-# ON 상태로 전환 후
+https://user-images.githubusercontent.com/104303815/208547553-478bd961-ec82-4c38-8f7d-7763a13689ae.mp4
 
 
-	https://user-images.githubusercontent.com/104303815/208547726-14f0359c-3e6f-48d2-898b-4fb498cc1610.mp4
+ON 상태로 전환 후
+
+
+https://user-images.githubusercontent.com/104303815/208547726-14f0359c-3e6f-48d2-898b-4fb498cc1610.mp4
 
 
