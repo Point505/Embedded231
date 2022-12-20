@@ -118,26 +118,23 @@
 	
 	
 	return distance;
-}
+	}
 	
 	//------------------------------------------------------------------- 멀티 프로세스 및 IPC
 	void Distance()// 센서 동작 함수
 	{
 	
-	
-		int loop = 0, count; // 센서 변수
-		float f; // 센서 변수
-	
+		......
 	
 		pid_t pid;
 
 		pipe(FIFO);
-		pid = fork();
+		pid = fork(); // 분기 지점
 
 		while ( 1 )
     		{
 		
-            		if(pid == 0)
+            		if(pid == 0) // 자식 프로세스
       			{
 		 		fwc[0]=PinNum();
 				write(FIFO[1],fwc,sizeof(char)); // FIFO 통신으로 초음파 값을 저장한다.
@@ -145,30 +142,12 @@
      
      
 	
-			else
+			else // 부모 프로세스
     			{  
-       
 				 
 				read(FIFO[0],frc,sizeof(char));// 자식 프로세스로 부터 받아온 값
   
- 			      if(digitalRead(GPIO_INPUT) == 0) //  버튼 입력 확인
-					Light_Control();	
-		
-        
-        
-       
-        			if((int)frc[0] >=20 && Check != 1)
-        			{
-					ClockOPEN();//Clock 함수 호출 후 시간 확
-					Check = 1;	}
-
-		
-		
-				else if((int)frc[0]< 6 && Check != 0)
-				{
-					ClockCLOSE();
-					Check = 0;	}
-				
+ 			      	..........
   			}
   		delay(100); 
 		}
