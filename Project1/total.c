@@ -237,7 +237,7 @@ void Distance()// 센서 동작 함수
 		
      
         
-        if(loop++ == 100)break;//그냥 100번 수행되고 종료 되는 듯
+     
      
 	//printf( "Distance : %d cm\n", (int)distance );
 		
