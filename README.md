@@ -6,22 +6,23 @@
 # 1. 프로젝트의 목적 및 용도 
   
   
-    이 프로젝트의 목적은 라즈베리 파이와 모듈을 사용하여 일정거리 이상 또는 이하로 변화가 일어나면 그 변화가 발생하는
-    
-    시간을 기록하여 출입을 확인하기 위함이다.
+	아이디어 배경
 
+		연구실 밖을 잠깐 나간동안 침입을 감지하는 시스템의 필요성
 
+	아이디어 내용
 
+		초음파 센서로 문과의 거리를 측정	
+		거리 차이가 발생시 시각을 기록하고 열림 또는 닫힘을 출력
 
+	아이디어 기대효과 
+
+		앞으로 문으로 출입하는 사람이 있는지 몇 번 열리고 닫혔는지 
+		시각은 언제인지를 확인할 수 있게 됨
 
 
  # 2. 프로젝트를 시작하는 방법
  
-    이 프로젝트는 리눅스 환경에서 작성되었기 때문에 윈도우에서는 작동하지 않을 수 있다 그럼으로 버츄얼 박스를 설치하거나
-   
-    라즈베리 파이를 따로 구입하여 실행시키는 것을 권장한다.
- 
-    만약 리눅스 환경이라면 gedit나 geany 같은 편집기를 이용하여 코드를 수정 시킬 수 있으며
    
     작동은 gcc 로 컴파일한후 sudo 명령어로 실행 시키면 된다
  
@@ -44,27 +45,29 @@
 # 3. 동작
 
 
-     조건문을 통하여 변수 distance로 값을 확인한다. distance 변수는 초음파 센서가 측정한 값이다.
-  
+     조건문을 통하여 변수 frc[0]로 값을 현재 상태를 확인한다.
+     20 보다 크면 OPEN 을 6보다 작으면 CLOSE를 출력한다.
 
-   		    if((int)distance >=10 && Check != 1)
-		    {
-				    ClockOPEN();//Clock 함수 호출 후 시간 확
-				    Check = 1;
-		    }
+   	if((int)frc[0] >=20 && Check != 1)
+        {
+		ClockOPEN();//Clock 함수 호출 후 시간 확
+		Check = 1;
+						
+	}
 
 		
 		
-		    else if((int)distance < 4 && Check != 0)
-		    {
-				    ClockCLOSE();
-				    Check = 0;
-		    }
-        
+	else if((int)frc[0]< 6 && Check != 0)
+	{
+		ClockCLOSE();
+		Check = 0;
+		
+        }
         
         //-------------------------------------------------------------- 시간 최초 초기
         
         I2C를 사용하였으며 최초로 값을 초기화 시켜주는 함수이다.
+	0을 입력하면 Wtite에 입력한 값으로 초기화 된다.
         
         if(atoi(argv[1])==0){
         
@@ -80,64 +83,102 @@
               wiringPiI2CWriteReg8(i2c_fd, 0x00,0x00); 
         }
 		
-        //-------------------------------------------------------------------- 버튼 인식
-         
-        GPIO를 통하여 버튼을 인식한다.
-        
-        Int PinNum()
-        {
-            delay(90);
-            i = digitalRead(GPIO_INPUT);
+        //-------------------------------------------------------------------- 
+	
+	// 초음파 센서로 부터 값을 읽어들인다.
+	
+       int PinNum()
 
-             return i;
-      	}
+	{
+	    long start, stop; // 센서 변수 
+	    float distance; // 센서 변수수
+	
+	    pinMode( GPIO_TRIGGER, OUTPUT );// GPIO_TRIGGER = 15 define
+	    pinMode( GPIO_ECHO, INPUT );// GPIO_ECHO = 18 define
+    
+  
+	    digitalWrite( GPIO_TRIGGER, LOW );
+	    digitalWrite( GPIO_TRIGGER, HIGH);
+	    delayMicroseconds( 10 );
+
+	    digitalWrite( GPIO_TRIGGER, LOW);
+
+	    wait_state(LOW);
+
+	    start = micros();
+
+	    wait_state(HIGH);
+
+	    stop = micros();
+
+	    distance = (float)(stop - start) / 58.8235;
+
+	
+	 delay(90);
+	
+	
+	return distance;
+}
 	
 	//------------------------------------------------------------------- 멀티 프로세스 및 IPC
-
-		void Distance()// 센서 동작 함수
+	void Distance()// 센서 동작 함수
 	{
-
-		......
+	
+	
+		int loop = 0, count; // 센서 변수
+		float f; // 센서 변수
+	
+	
 		pid_t pid;
 
 		pipe(FIFO);
 		pid = fork();
 
-		.....
-
-	    while ( 1 )
-	    {
-		.....
-
-	      if(pid == 0) // 자식 프로세스
-	      {
-
-
-			  delay(50);
-			  fwc[0]=PinNum(); // 버튼 함수 PinNum을  호출하여 fwc[0]에 0 | 1을 저장
-			  write(FIFO[1],fwc,sizeof(char));// IPC FIFO을 단방향 통신을 사용하여 PinNum의 return 값을 부모 프로세스로 전달
-			}
-
-		else
-	    {  
-
-			//FIFO 통신 // 저장된 값을 F에 저장 // 여기서 값이 계속 넘어 오니까 그런 
-
-
-	      read(FIFO[0],frc,sizeof(char)); // FIFO를 통항 자식 프로세스로 부터 받은 값
-
-	      .........
+		while ( 1 )
+    		{
+		
+            		if(pid == 0)
+      			{
+		 		fwc[0]=PinNum();
+				write(FIFO[1],fwc,sizeof(char)); // FIFO 통신으로 초음파 값을 저장한다.
+	 		}
+     
+     
+	
+			else
+    			{  
+       
+				 
+				read(FIFO[0],frc,sizeof(char));// 자식 프로세스로 부터 받아온 값
+  
+ 			      if(digitalRead(GPIO_INPUT) == 0) //  버튼 입력 확인
+					Light_Control();	
+		
+        
+        
+       
+        			if((int)frc[0] >=20 && Check != 1)
+        			{
+					ClockOPEN();//Clock 함수 호출 후 시간 확
+					Check = 1;	}
 
 		
-	    }
-	  delay(50); 
+		
+				else if((int)frc[0]< 6 && Check != 0)
+				{
+					ClockCLOSE();
+					Check = 0;	}
+				
+  			}
+  		delay(100); 
 		}
 	}
 	
 	
 	
 # 모듈과 라즈베리 파이간 연결
-![image](https://user-images.githubusercontent.com/104303815/208537651-6b177d9c-c81b-4372-8a94-970f4eaf507b.png)
+![1](https://user-images.githubusercontent.com/104303815/208619925-06f75e4d-4883-48ee-9ac8-7424cf0ea712.PNG)
+
 
 # 기능 시연 영상
 
