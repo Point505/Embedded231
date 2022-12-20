@@ -70,11 +70,36 @@ int wait_state(int state)// 초음파 센서 상태  LOW HIGH
 }
 
 int PinNum()
+
 {
-	 delay(90);
-	i = digitalRead(GPIO_INPUT);
+		long start, stop; // 센서 변수 
+	float distance; // 센서 변수수
 	
-	return i;
+	pinMode( GPIO_TRIGGER, OUTPUT );// GPIO_TRIGGER = 15 define
+	pinMode( GPIO_ECHO, INPUT );// GPIO_ECHO = 18 define
+    
+  
+	digitalWrite( GPIO_TRIGGER, LOW );
+	digitalWrite( GPIO_TRIGGER, HIGH);
+        delayMicroseconds( 10 );
+        
+        digitalWrite( GPIO_TRIGGER, LOW);
+        
+        wait_state(LOW);
+        
+        start = micros();
+        
+        wait_state(HIGH);
+        
+        stop = micros();
+        
+        distance = (float)(stop - start) / 58.8235;
+	
+	
+	 delay(90);
+	
+	
+	return distance;
 	}
     
 
@@ -92,8 +117,8 @@ void Light_Control() // 161번쨰 줄 버튼 인식
 			
 					while(1)
 					{
+							
 						
-						digitalWrite(GPIO_OUTPUT,LOW);
 						if(System_State == 0)
 						{
 								printf("\n");
@@ -102,12 +127,12 @@ void Light_Control() // 161번쨰 줄 버튼 인식
 								printf("---------------------------\n");
 								printf("\n");
 								
-								
+								digitalWrite(GPIO_OUTPUT,LOW);
 								System_State = 1;
+								delay(200);
 						}
-						delay(80);
-						  read(FIFO[0],frc,sizeof(char));
-						if(frc[0] == 0 && digitalRead(GPIO_OUTPUT)== 0)
+						
+						else if(digitalRead(GPIO_INPUT)== 0 && digitalRead(GPIO_OUTPUT)== 0)
 						{		
 								printf("\n");
 								printf("---------------------------\n");
@@ -116,9 +141,13 @@ void Light_Control() // 161번쨰 줄 버튼 인식
 								printf("\n");
 								System_State=0;
 								digitalWrite(GPIO_OUTPUT,HIGH);
+								delay(200);
 								break;
 						}
-									
+								
+						
+						 // read(FIFO[0],frc,sizeof(char));
+						
 						
 						
 					}
@@ -137,62 +166,44 @@ void Light_Control() // 161번쨰 줄 버튼 인식
 void Distance()// 센서 동작 함수
 {
 	
-	long start, stop; // 센서 변수 
+	
 	int loop = 0, count; // 센서 변수
 	float f; // 센서 변수
-	float distance; // 센서 변수수
+	
 	
 	
 	
 	// 1 = Write 0 = Read = 리턴값 읽어 올 
-	pid_t pid;
+	
+	
+
+    
+   // delay(500);
+    pid_t pid;
 	
 	pipe(FIFO);
 	pid = fork();
-	
-
-	pinMode( GPIO_TRIGGER, OUTPUT );// GPIO_TRIGGER = 15 define
-    pinMode( GPIO_ECHO, INPUT );// GPIO_ECHO = 18 define
-    
-  
-    digitalWrite( GPIO_TRIGGER, LOW );
-    
-   // delay(500);
-    
     while ( 1 )
     {
 	//	printf("distance While함수 진입\n");
         // Send 10us pulse to trigger
         //GPIO로 읽어오는 값을 멀티 프로세서로 사용
-        digitalWrite( GPIO_TRIGGER, HIGH);
-        delayMicroseconds( 10 );
-        
-        digitalWrite( GPIO_TRIGGER, LOW);
-        
-        wait_state(LOW);
-        
-        start = micros();
-        
-        wait_state(HIGH);
-        
-        stop = micros();
-        
-        distance = (float)(stop - start) / 58.8235;
+       
       //센서는 계속 작동해야 하고 일정값 이상이 잡히면 Clock 함수 호출 
       //----------------------------------------------------------------------------------- 멀티프로세스
       
-      
-     
-      if(pid == 0)
+            if(pid == 0)
       {
 		  
 		
-		  delay(50);
+		  //delay(50);
 		  fwc[0]=PinNum();
 		   
 	//printf("%d\n",fwc[0]);
 		  write(FIFO[1],fwc,sizeof(char));
-		}
+	 }
+     
+     
 	
 	else
     {  
@@ -201,35 +212,37 @@ void Distance()// 센서 동작 함수
 		
 
       read(FIFO[0],frc,sizeof(char));
-    
-       if(frc[0] == 0) //  받아온 값으로 확인 
-				{	Light_Control();}	
+  
+       if(digitalRead(GPIO_INPUT) == 0) //  받아온 값으로 확인 
+				{Light_Control();}	
 		
         
         
        
-        if((int)distance >=10 && Check != 1)
+        if((int)frc[0] >=20 && Check != 1)
         {
 				ClockOPEN();//Clock 함수 호출 후 시간 확
 				Check = 1;
-		}
+						
+	}
 
 		
 		
-		else if((int)distance < 4 && Check != 0)
-		{
+	else if((int)frc[0]< 6 && Check != 0)
+	{
 				ClockCLOSE();
 				Check = 0;
-		}
+		
+	}
 		
      
         
         if(loop++ == 100)break;//그냥 100번 수행되고 종료 되는 듯
      
 	//printf( "Distance : %d cm\n", (int)distance );
-
+		
     }
-  delay(50); 
+  delay(100); 
 	}
 }
 	
